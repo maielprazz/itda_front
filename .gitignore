@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-/src/assets/boxicon-2.0.9
 /src/assets/fonts
 /src/assets/images
 /src/assets/data
