@@ -12,7 +12,7 @@ import Container from '@mui/material/Container';
 import Home from './Home.jsx';
 import Loading from './Loading.jsx';
 import ServerList from './ServerList.jsx';
-// import Storemaster from './Storemaster.jsx';
+import Storemaster from './Storemaster.jsx';
 
 function Copyright() {
   return (
@@ -52,13 +52,13 @@ function Content() {
             path="/home"
             name="Home"
             render={(props) => <Home {...props} />}
-          />
-          <Route
-            path="/storemaster"
-            name="Storemaster"
-            render={(props) => <Storemaster {...props} />}
-          />
-          */}
+          />*/}
+        <Route
+          path="/storemaster"
+          name="Storemaster"
+          render={(props) => <Storemaster {...props} />}
+        />
+
         <Route
           exact
           path="/serverlist"

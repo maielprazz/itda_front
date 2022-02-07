@@ -11,7 +11,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+// import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -38,8 +39,8 @@ const useStyles = makeStyles((theme) => ({
   footer: {
     width: '100%',
   },
-  avatar: {
-    marginLeft: theme.spacing(2),
+  usertext: {
+    marginRight: theme.spacing(2),
   },
   logout: {
     marginLeft: theme.spacing(1),
@@ -124,7 +125,7 @@ const useStyles = makeStyles((theme) => ({
   logo: {
     maxWidth: 80,
     maxHeight: 64,
-    marginRight: theme.spacing(4),
+    marginRight: theme.spacing(6),
   },
 }));
 
@@ -212,32 +213,31 @@ export default function Layout() {
     setUser,
   } = useContext(AppContext);
 
-  console.log('layout, app history', history);
+  // console.log('layout, app history', history);
 
   useEffect(() => {
-    setAccToken(
-      localStorage.getItem('ITDAacctoken')
-        ? JSON.parse(localStorage.getItem('ITDAacctoken'))
+    setRefToken(
+      localStorage.getItem('ITDAreftoken')
+        ? JSON.parse(localStorage.getItem('ITDAreftoken'))
         : null
     );
-    setUser(accToken ? jwt_decode(accToken).username : null);
+    setUser(refToken ? jwt_decode(refToken).username : null);
 
-    let expToken = accToken ? jwt_decode(accToken).exp : dayjs.unix(dayjs());
-    let user = accToken ? jwt_decode(accToken).username : null;
+    let expToken = refToken ? jwt_decode(refToken).exp : dayjs.unix(dayjs());
+    let user = refToken ? jwt_decode(refToken).username : null;
 
     if (dayjs.unix(expToken).diff(dayjs()) < 1) {
-      console.log('expired');
+      console.log('ref token expired');
       history.push('/login');
     }
-    console.log('set user new', user);
 
     if (!user) {
       console.log('must login');
       history.push('/login');
     }
-  }, [accToken, history, user]);
+  }, [refToken, history, user]);
 
-  console.log('our new user', user);
+  // console.log('our new user', user);
 
   useEffect(() => {
     setDrawmenu(
@@ -269,13 +269,14 @@ export default function Layout() {
 
   const dispatch = useDispatch();
   const handleDrawerOpen = () => {
+    console.log('Opening...');
     setExpandOpen(true);
   };
   const handleDrawerClose = () => {
+    console.log('Closing...');
     setExpandOpen(false);
   };
   const handleLogout = () => {
-    console.log('logout from button');
     dispatch(logout());
     history.push('/login');
   };
@@ -287,23 +288,38 @@ export default function Layout() {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
+            // aria-label="open drawer"
+            // onClick={handleDrawerOpen}
             edge="start"
-            className={clsx(classes.menuButton, {
-              [classes.hide]: expandOpen,
-            })}
           >
-            <Tooltip title="Show Menu">
-              <MenuIcon />
-            </Tooltip>
+            {expandOpen ? (
+              <Tooltip title="Abbreviate">
+                <ChevronLeftIcon onClick={handleDrawerClose} />
+              </Tooltip>
+            ) : (
+              <Tooltip title="Expand Menu">
+                <ChevronRightIcon onClick={handleDrawerOpen} />
+              </Tooltip>
+            )}
+            {/* <MenuIcon /> */}
           </IconButton>
+          <HomeIcon onClick={() => history.push('/')} />
           <Typography className={classes.date}>
             {format(new Date(), 'do MMM Y')}
           </Typography>
           <Typography>
-            Hi, {<span className={classes.capitalizeText}>{user}</span>}
-          </Typography>{' '}
+            <p>
+              {' '}
+              Hi,{' '}
+              {
+                <span
+                  className={clsx(classes.capitalizeText, classes.usertext)}
+                >
+                  {user.toString().replace('.', ' ')}
+                </span>
+              }{' '}
+            </p>
+          </Typography>
           {user ? (
             <Button
               className={classes.logout}
@@ -330,20 +346,20 @@ export default function Layout() {
       {/* Drawer */}
       <Drawer variant="permanent" open={expandOpen}>
         <div className={classes.toolbar}>
-          <img
-            src={logo}
-            alt="MAP AKTIF LOGO"
-            className={classes.logo}
-            onClick={() => history.push('/home')}
-          />
-          <Tooltip title="Hide Menu">
-            <IconButton onClick={handleDrawerClose}>
+          <Tooltip title="MAP">
+            <img
+              src={logo}
+              alt="MAP AKTIF LOGO"
+              className={classes.logo}
+              onClick={() => history.push('/')}
+            />
+            {/* <IconButton onClick={handleDrawerClose}>
               {theme.direction === 'rtl' ? (
                 <ChevronRightIcon />
               ) : (
                 <ChevronLeftIcon />
               )}
-            </IconButton>
+            </IconButton> */}
           </Tooltip>
         </div>
         <Divider />
@@ -360,7 +376,7 @@ export default function Layout() {
                 handleListClick(val.id);
               }}
             >
-              <Tooltip title={val.text}>
+              <Tooltip title={val.tooltip}>
                 <ListItemIcon>
                   <i className={`MuiSvgIcon-root ` + val.icon}></i>
                 </ListItemIcon>
@@ -384,12 +400,17 @@ export default function Layout() {
               <List component="div" disablePadding>
                 {val.submenu.map((subval, subidx) => (
                   <ListItemButton
-                    sx={{ pl: 4, background: '#a4a4a4' }}
-                    className={classes.active}
+                    sx={{
+                      pl: 4,
+                      background: '#fff',
+                      ...(location.pathname === subval.path && {
+                        background: '#a4a4a4',
+                      }),
+                    }}
                     key={subidx}
                     onClick={() => history.push(subval.path)}
                   >
-                    <Tooltip title={subval.text}>
+                    <Tooltip title={subval.tooltip}>
                       <ListItemIcon>
                         <i className={`MuiSvgIcon-root ` + subval.icon}></i>
                       </ListItemIcon>

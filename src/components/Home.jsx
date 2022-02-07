@@ -15,16 +15,10 @@ const Home = () => {
   return (
     <div>
       <Typography variant="h5">Welcome to MAA Data Analytics Portal</Typography>
-      <Typography paragraph>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores
-        sequi ut hic voluptatibus quisquam deleniti sapiente libero maiores
-        minima eius suscipit saepe enim in dolores, aspernatur sed qui quos. Sed
-        reiciendis quam assumenda eos natus necessitatibus, quae deserunt dolore
-        nihil, beatae possimus blanditiis quas facere at harum a. Fugit, labore.
-      </Typography>
+
       <br />
       <Container className={classes.container}>
-        <ButtonGroup>
+        {/* <ButtonGroup>
           <Button variant="contained" color="primary">
             Our Team
           </Button>
@@ -35,7 +29,7 @@ const Home = () => {
           >
             Contact Us
           </Button>
-        </ButtonGroup>
+        </ButtonGroup> */}
       </Container>
     </div>
   );

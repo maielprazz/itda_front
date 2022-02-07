@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+// import MaterialTable from '@material-table/core';
+import MUIDataTable from 'mui-datatables';
 import { makeStyles } from '@mui/styles';
-import Button from '@mui/material/Button';
-import axios from 'axios';
-// import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-// import BootstrapTable from 'react-bootstrap-table-next';
-// import paginationFactory from 'react-bootstrap-table2-paginator';
-// import filterFactory, { textFilter } from 'react-bootstrap-table2-filter';
-// import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit'; //{ CSVExport }
-// import overlayFactory from 'react-bootstrap-table2-overlay';
+import useAxios from '../utils/useAxios';
+import Loading from './Loading.jsx';
+import Alert from '@mui/material/Alert';
+import dayjs from 'dayjs';
+// import { ExportCsv } from '@material-table/exporters';
+// import { flexbox } from '@mui/system';
+import LinearProgress from '@mui/material/LinearProgress';
 
 const useStyles = makeStyles((theme) => ({
   headerTable: {
@@ -18,162 +19,144 @@ const useStyles = makeStyles((theme) => ({
     tableLayout: 'auto !important',
     background: 'red',
   },
+  scrollContainer: {
+    display: 'flex',
+    overflowX: 'auto',
+  },
 }));
 
-const { SearchBar } = Search;
-
-function Storemaster() {
+const Storemaster = () => {
   const [storelist, setStoreList] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [status, setStatus] = useState(200);
+  const [progress, setProgress] = useState(0);
   const classes = useStyles();
-  const UserExportCSV = (props) => {
-    const handleExport = () => {
-      props.onExport();
-    };
-    return (
-      <Button variant="contained" color="primary" onClick={handleExport}>
-        Export to CSV
-      </Button>
-    );
+
+  let api = useAxios();
+
+  useEffect(() => {
+    getListStore();
+  }, []);
+
+  let getListStore = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/api/storemaster/');
+      setStoreList(response.data);
+      setLoading(false);
+      setStatus(200);
+    } catch (err) {
+      setStatus(err.response.status);
+      setStoreList([]);
+      setLoading(false);
+      console.log('terjadi error:', err);
+      console.log(err.response.status);
+    }
   };
 
   const columns = [
-    { dataField: 'ASOFDATE', text: 'ASOFDATE', sort: true },
-    { dataField: 'COMPCODE', text: 'COMPCODE', sort: true },
-    { dataField: 'SITECODE', text: 'SITECODE', sort: true },
-    { dataField: 'STOREDESC', text: 'STOREDESC', sort: true },
-    { dataField: 'MALLNAME', text: 'MALLNAME', sort: true },
-    { dataField: 'TELP', text: 'TELP', sort: true },
-    { dataField: 'EMAIL', text: 'EMAIL', sort: true },
-    { dataField: 'CONCEPT', text: 'CONCEPT', sort: true },
-    { dataField: 'PROVINCE', text: 'PROVINCE', sort: true },
-    { dataField: 'REGION', text: 'REGION', sort: true },
-    { dataField: 'GM_OM', text: 'GM_OM', sort: true },
-    { dataField: 'GM_MAIL', text: 'GM_MAIL', sort: true },
-    { dataField: 'OM_NAME', text: 'OM_NAME', sort: true },
-    { dataField: 'OM_MAIL', text: 'OM_MAIL', sort: true },
-    { dataField: 'OM_PHONE', text: 'OM_PHONE', sort: true },
-    { dataField: 'OIC_NAME', text: 'OIC_NAME', sort: true },
-    { dataField: 'OIC_MAIL', text: 'OIC_MAIL', sort: true },
-    { dataField: 'OIC_PHONE', text: 'OIC_PHONE', sort: true },
-    { dataField: 'SBU', text: 'SBU', sort: true },
-    { dataField: 'STORETYPE', text: 'STORETYPE', sort: true },
-    { dataField: 'SITEPROFILE', text: 'SITEPROFILE', sort: true },
-    { dataField: 'CONNECTION_TYPE', text: 'CONNECTION_TYPE', sort: true },
-    { dataField: 'STORESTATUS_SQL', text: 'STORESTATUS_SQL', sort: true },
-    { dataField: 'STOREOPEN_DATE', text: 'STOREOPEN_DATE', sort: true },
-    { dataField: 'STORECLOSE_DATE', text: 'STORECLOSE_DATE', sort: true },
-    { dataField: 'FAILOVER_STATUS', text: 'FAILOVER_STATUS', sort: true },
+    { name: 'COMPCODE', label: 'COMPCODE' },
+    { name: 'SITECODE', label: 'SITECODE' },
+    { name: 'STOREDESC', label: 'STOREDESC' },
+    { name: 'MALLNAME', label: 'MALLNAME' },
+    { name: 'TELP', label: 'TELP' },
+    { name: 'EMAIL', label: 'EMAIL' },
+    { name: 'CONCEPT', label: 'CONCEPT' },
+    { name: 'GM_OM', label: 'GM_OM' },
+    { name: 'GM_MAIL', label: 'GM_MAIL' },
+    { name: 'RH_NAME', label: 'RH_NAME' },
+    { name: 'RH_EMAIL', label: 'RH_EMAIL' },
+    { name: 'RH_PHONE', label: 'RH_PHONE' },
+    { name: 'AM_NAME', label: 'AM_NAME' },
+    { name: 'AM_EMAIL', label: 'AM_EMAIL' },
+    { name: 'AM_PHONE', label: 'AM_PHONE' },
+    { name: 'SBU', label: 'SBU' },
+    { name: 'CITY', label: 'CITY' },
+    { name: 'PROVINCE', label: 'PROVINCE' },
+    { name: 'REGIONAL', label: 'REGIONAL' },
+    { name: 'STORETYPE', label: 'STORETYPE' },
+    { name: 'SITEPROFILE', label: 'SITEPROFILE' },
+    { name: 'CONNECTION_TYPE', label: 'CONNECTION_TYPE' },
+    { name: 'STORESTATUS_SQL', label: 'STORESTATUS_SQL' },
+    { name: 'STOREOPEN_DATE', label: 'STOREOPEN_DATE' },
+    { name: 'STORECLOSE_DATE', label: 'STORECLOSE_DATE' },
+    { name: 'FAILOVER_STATUS', label: 'FAILOVER_STATUS' },
     {
-      dataField: 'JASPER_NUMBER_DEVICE',
-      text: 'JASPER_NUMBER_DEVICE',
-      sort: true,
+      name: 'JASPER_NUMBER_DEVICE',
+      label: 'JASPER_NUMBER_DEVICE',
     },
-    { dataField: 'JASPESR_DEVICE', text: 'JASPESR_DEVICE', sort: true },
-    { dataField: 'JASPER_IPADDRESS', text: 'JASPER_IPADDRESS', sort: true },
-    { dataField: 'JASPER_MSISDN', text: 'JASPER_MSISDN', sort: true },
-    { dataField: 'JASPER_IMSI', text: 'JASPER_IMSI', sort: true },
-    { dataField: 'ROOT_STATUS', text: 'ROOT_STATUS', sort: true },
-    { dataField: 'IP_EXTERNAL', text: 'IP_EXTERNAL', sort: true },
-    { dataField: 'IP_MIKROTIK', text: 'IP_MIKROTIK', sort: true },
-    { dataField: 'IP_GATEWAY', text: 'IP_GATEWAY', sort: true },
-    { dataField: 'IP_FORTIGATE', text: 'IP_FORTIGATE', sort: true },
+    { name: 'JASPESR_DEVICE', label: 'JASPESR_DEVICE' },
+    { name: 'JASPER_IPADDRESS', label: 'JASPER_IPADDRESS' },
+    { name: 'JASPER_MSISDN', label: 'JASPER_MSISDN' },
+    { name: 'JASPER_IMSI', label: 'JASPER_IMSI' },
+    { name: 'ROOT_STATUS', label: 'ROOT_STATUS' },
+    { name: 'IP_EXTERNAL', label: 'IP_EXTERNAL' },
+    { name: 'IP_NETWORKDEVICE', label: 'IP_NETWORKDEVICE' },
+    { name: 'DEVICE_NAME', label: 'DEVICE_NAME' },
+    { name: 'SID', label: 'SID' },
+    { name: 'ISP', label: 'ISP' },
+    { name: 'Layanan', label: 'Layanan' },
+    { name: 'Speed_MBPS', label: 'Speed_MBPS' },
+    {
+      name: 'ASOFDATE',
+      label: 'ASOFDATE',
+    },
   ];
 
-  // [
-
-  //   {
-  //     dataField: 'id',
-  //     text: 'id',
-  //     headerStyle: { width: '40px' },
-  //   },
-  //   { dataField: 'name', text: 'Name', sort: true, filter: textFilter() },
-  //   { dataField: 'username', text: 'Username', sort: true },
-  //   { dataField: 'email', text: 'Email', sort: true },
-  // ];
-  const pagination = paginationFactory({
-    page: 1,
-    sizePerPage: 30,
-    lastPageText: '>>',
-    firstPageText: '<<',
-    nextPageText: '>',
-    prePageText: '<',
-    showTotal: true,
-    alwaysShowAllBtns: true,
-    // onPageChange: function (page, sizePerPage) {
-    //   // console.log('page', page);
-    //   // console.log('sizePerPage', sizePerPage);
-    // },
-  });
-
-  useEffect(() => {
-    axios
-      //.get('http://localhost:8000/api/storemaster/')
-      .get('api/storemaster/')
-      .then((res) => {
-        setStoreList(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-  }, []);
+  // const xoptions = {
+  //   padding: 'dense',
+  //   search: true,
+  //   searchFieldAlignment: 'left',
+  //   doubleHorizontalScroll: true,
+  //   pageSize: 500,
+  //   pageSizeOptions: [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000],
+  //   paginationType: 'stepped',
+  //   searchAutoFocus: true,
+  //   sorting: true,
+  //   exportMenu: [
+  //     {
+  //       label: 'Download to CSV',
+  //       exportFunc: (cols, datas) =>
+  //         ExportCsv(cols, datas, 'List_Store_' + dayjs()),
+  //     },
+  //   ],
+  // };
+  const options = {
+    search: true,
+    sort: true,
+    rowsPerPageOptions: [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000],
+    rowsPerPage: 500,
+    downloadOptions: { filename: 'List_Store_' + dayjs(), separator: ',' },
+    print: false,
+    selectableRows: 'none',
+    selectableRowsHeader: false,
+    setTableProps: () => {
+      return {
+        padding: 'default',
+        // material ui v4 only
+        size: 'small',
+      };
+    },
+  };
 
   return (
     <div>
-      <ToolkitProvider
-        bootstrap4
-        keyField="SITECODE"
-        data={storelist}
-        columns={columns}
-        exportCSV
-        search
-      >
-        {(props) => (
-          <React.Fragment>
-            <UserExportCSV {...props.csvProps} />
-            <br />
-            <br />
-            <SearchBar {...props.searchProps} style={{ width: '200%' }} />
-            <BootstrapTable
-              wrapperClasses="table-responsive"
-              rowClasses="text-nowrap"
-              striped
-              hover
-              condensed
-              headerWrapperClasses={classes.headerTable}
-              loading={loading}
-              noDataIndication={
-                loading ? (
-                  <strong>Loading...</strong>
-                ) : (
-                  <strong>Data is empty alias kosooong gan...</strong>
-                )
-              }
-              overlay={overlayFactory({
-                spinner: true,
-                styles: {
-                  overlay: (base) => ({
-                    ...base,
-                    background: 'rgba(148,216, 246, 0.5)',
-                  }),
-                },
-              })}
-              // bootstrap4
-              keyField="STORECODE"
-              // columns={columns}
-              // data={userlist}
-              pagination={pagination}
-              filter={filterFactory()}
-              {...props.baseProps}
-            />
-          </React.Fragment>
-        )}
-      </ToolkitProvider>
+      {loading && <Loading />}
+      <h1 align="center">List Store</h1>
+      {status === 200 ? (
+        <MUIDataTable
+          columns={columns}
+          data={storelist}
+          title="List Store"
+          options={options}
+        />
+      ) : (
+        <Alert severity="error">
+          {'Sorry, You Have No Authorized to see this data...'}
+        </Alert>
+      )}
     </div>
   );
-}
+};
 
 export default Storemaster;
