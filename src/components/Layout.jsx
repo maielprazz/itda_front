@@ -269,11 +269,11 @@ export default function Layout() {
 
   const dispatch = useDispatch();
   const handleDrawerOpen = () => {
-    console.log('Opening...');
+    // console.log('Opening...');
     setExpandOpen(true);
   };
   const handleDrawerClose = () => {
-    console.log('Closing...');
+    // console.log('Closing...');
     setExpandOpen(false);
   };
   const handleLogout = () => {

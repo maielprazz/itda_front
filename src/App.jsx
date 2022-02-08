@@ -70,7 +70,7 @@ const App = () => {
     }
   }, [user]);
 
-  console.log('decoded user', user);
+  // console.log('decoded user', user);
 
   const contextData = {
     accToken,

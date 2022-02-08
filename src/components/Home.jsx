@@ -14,7 +14,9 @@ const Home = () => {
 
   return (
     <div>
-      <Typography variant="h5">Welcome to MAA Data Analytics Portal</Typography>
+      <Typography variant="h5" align="center">
+        Welcome to MAA Data Analytics Portal
+      </Typography>
 
       <br />
       <Container className={classes.container}>

@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
-// import MaterialTable from '@material-table/core';
 import MUIDataTable from 'mui-datatables';
 import { makeStyles } from '@mui/styles';
 import useAxios from '../utils/useAxios';
 import Loading from './Loading.jsx';
 import Alert from '@mui/material/Alert';
 import dayjs from 'dayjs';
-// import { ExportCsv } from '@material-table/exporters';
-// import { flexbox } from '@mui/system';
-import LinearProgress from '@mui/material/LinearProgress';
 
 const useStyles = makeStyles((theme) => ({
   headerTable: {
@@ -29,7 +25,7 @@ const Storemaster = () => {
   const [storelist, setStoreList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState(200);
-  const [progress, setProgress] = useState(0);
+
   const classes = useStyles();
 
   let api = useAxios();
@@ -49,8 +45,8 @@ const Storemaster = () => {
       setStatus(err.response.status);
       setStoreList([]);
       setLoading(false);
-      console.log('terjadi error:', err);
-      console.log(err.response.status);
+      // console.log('terjadi error:', err);
+      // console.log(err.response.status);
     }
   };
 

@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
-import MaterialTable from '@material-table/core';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import Loading from './Loading.jsx';
+import Alert from '@mui/material/Alert';
+import useAxios from '../utils/useAxios';
+import dayjs from 'dayjs';
+import MUIDataTable from 'mui-datatables';
 import { makeStyles } from '@mui/styles';
-import { AppContext } from '../context/AppContext';
 
 const useStyles = makeStyles((theme) => ({
   headerTable: {
@@ -15,90 +17,86 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ServerList() {
-  const context = useContext(AppContext);
-  console.log(location.pathname);
-  const {
-    accToken,
-    setAccToken,
-    refToken,
-    setRefToken,
-    expandOpen,
-    setExpandOpen,
-    user,
-    setUser,
-  } = context;
+const ServerList = () => {
+  const [serverlist, setServerList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState(200);
+
+  let api = useAxios();
+
   useEffect(() => {
-    // setExpandOpen(false);
-    console.log(expandOpen);
-  }, [expandOpen]);
+    getListStore();
+  }, []);
+
+  let getListStore = async () => {
+    try {
+      setLoading(true);
+      // console.log('fetching serverlist');
+      const response = await api.get('/api/serverlist/');
+      setServerList(response.data);
+      setLoading(false);
+      setStatus(200);
+    } catch (err) {
+      setStatus(err.response.status);
+      setServerList([]);
+      setLoading(false);
+    }
+  };
 
   const columns = [
-    { title: 'Server_Status', field: 'Server_Status', sort: true },
-    { title: 'Name', field: 'Name', sort: true },
-    { title: 'Hostname', field: 'Hostname', sort: true },
-    { title: 'IP', field: 'IP', sort: true },
-    { title: 'Windows_Server', field: 'Windows_Server', sort: true },
-    { title: 'CPU', field: 'CPU', sort: true },
-    { title: 'Memory', field: 'Memory', sort: true },
-    { title: 'SQL_Version', field: 'SQL_Version', sort: true },
-    { title: 'Disc_Size', field: 'Disc_Size', sort: true },
-    { title: 'Location', field: 'Location', sort: true },
+    { name: 'Server_Status', label: 'Server_Status' },
+    { name: 'Name', label: 'Name' },
+    { name: 'Hostname', label: 'Hostname' },
+    { name: 'IP', label: 'IP' },
+    { name: 'Windows_Server', label: 'Windows_Server' },
+    { name: 'CPU', label: 'CPU' },
+    { name: 'Memory', label: 'Memory' },
+    { name: 'SQL_Version', label: 'SQL_Version' },
+    { name: 'Disc_Size', label: 'Disc_Size' },
+    { name: 'Location', label: 'Location' },
   ];
 
-  const listdata = [];
-  // const [serverlist, setServerList] = useState(listdata);
-  // const [loading, setLoading] = useState(true);
-
-  const classes = useStyles();
-  // const UserExportCSV = (props) => {
-  //   const handleExport = () => {
-  //     props.onExport();
-  //   };
-  //   return (
-  //     <Button variant="contained" color="primary" onClick={handleExport}>
-  //       Export to CSV
-  //     </Button>
-  //   );
-  // };
-
-  // const columns = [
-  //   { dataField: 'Server_Status', text: 'Server Status', sort: true },
-  //   { dataField: 'Name', text: 'Name', sort: true },
-  //   { dataField: 'Hostname', text: 'Host', sort: true },
-  //   { dataField: 'IP', text: 'IP', sort: true },
-  //   { dataField: 'Windows_Server', text: 'Windows', sort: true },
-  //   { dataField: 'CPU', text: 'CPU', sort: true },
-  //   { dataField: 'Memory', text: 'Memory', sort: true },
-  //   { dataField: 'SQL_Version', text: 'SQl Version', sort: true },
-  //   { dataField: 'Disc_Size', text: 'Disc Size', sort: true },
-  //   { dataField: 'Location', text: 'Location', sort: true },
-  // ];
-
-  // useEffect(() => {
-  //   axios
-  //     //  .get('http://localhost:8000/api/listserver/') test
-  //     .get('api/listserver/')
-  //     .then((res) => {
-  //       setServerList(res.data);
-  //       setLoading(false);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //       setLoading(false);
-  //     });
-  // }, []);
+  const options = {
+    search: true,
+    sort: true,
+    rowsPerPageOptions: [10, 20],
+    rowsPerPage: 10,
+    downloadOptions: { filename: 'List_Server_' + dayjs(), separator: ',' },
+    print: false,
+    selectableRows: 'none',
+    selectableRowsHeader: false,
+    setRowProps: (data, dataindex, rowindex) => {
+      return {
+        className: rowindex % 2 == 0 ? { background: '#f5f5f5' } : null,
+      };
+    },
+    setTableProps: () => {
+      return {
+        padding: 'default',
+        // material ui v4 only
+        size: 'small',
+      };
+    },
+  };
 
   return (
     <div>
-      <h1 align="center">Our maintained server</h1>
-      <MaterialTable
-        columns={columns}
-        data={listdata}
-        title="ITDA managed server"
-      />
+      {loading && <Loading />}
+      <h1 align="center">List SQL Server</h1>
+      {status === 200 ? (
+        <MUIDataTable
+          columns={columns}
+          data={serverlist}
+          title="List Server"
+          options={options}
+        />
+      ) : (
+        <Alert severity="error">
+          {'Sorry, You Have No Authorized to see this data...'}
+        </Alert>
+      )}
     </div>
   );
-}
+};
 
 export default ServerList;
